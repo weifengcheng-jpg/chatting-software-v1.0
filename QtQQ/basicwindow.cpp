@@ -1,5 +1,10 @@
 #include "basicwindow.h"
 #include <QFile>
+#include <QStyleOption>
+#include <QPainter>
+#include <QApplication>
+#include <QMouseEvent>
+#include <QDesktopWidget>
 
 BasicWindow::BasicWindow(QWidget *parent)
 	: QDialog(parent)
@@ -40,7 +45,7 @@ void BasicWindow::initTitleBar(ButtonTypen buttontype)
 
 void BasicWindow::loadStyleSheet(const QString& sheetName)
 {
-	m_styleName == sheetName;
+	m_styleName = sheetName;
 	QFile file(":/xxxxx/CSS/" + sheetName + ".css");
 	file.open(QFile::ReadOnly);
 
@@ -69,9 +74,137 @@ void BasicWindow::loadStyleSheet(const QString& sheetName)
 	file.close();
 }
 
+//背景图
+void BasicWindow::initBackGroundColor()
+{
+	QStyleOption opt; //QStyleOption类存储了QStyle函数使用的参数。
+	opt.init(this);
+
+	QPainter p(this);
+	style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}
+
+//子类化部件时, 需要重写绘图事件设置背景图
+void BasicWindow::paintEvent(QPaintEvent* event)
+{
+	initBackGroundColor();
+	QDialog::paintEvent(event);
+}
+
+//QPixmap类是一个可以用作绘制设备的屏幕外图像表示。
+//头像转圆头像
+QPixmap BasicWindow::getRoundImage(const QPixmap& src, QPixmap& mask, QSize maskSize)
+{
+	if (maskSize == QSize(0, 0))
+	{
+		maskSize = mask.size();
+	}
+	else 
+	{
+		mask.scaled(maskSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	}
+
+	QImage resultImage(maskSize, QImage::Format_ARGB32_Premultiplied);
+	QPainter painter(&resultImage); //。QPainter类在小部件和其他绘制设备上执行低级绘制。
+	painter.setCompositionMode(QPainter::CompositionMode_Source);
+	painter.fillRect(resultImage.rect(), Qt::transparent);
+	painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+	painter.drawPixmap(0, 0, mask);
+	painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+	painter.drawPixmap(0, 0, src.scaled(Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	painter.end();
+
+	return QPixmap::fromImage(resultImage);
+}
+
+void BasicWindow::onShowClose(bool)
+{
+	close();
+}
+
+void BasicWindow::onShowMin(bool)
+{
+	showMinimized();
+}
+
+void BasicWindow::onShowHide(bool)
+{
+	hide();
+}
+
+void BasicWindow::onShowNormal(bool)
+{
+	show();
+	activateWindow();
+}
+
+void BasicWindow::onShowQuit(bool)
+{
+	QApplication::quit();
+}
+
+//鼠标移动事件
+void BasicWindow::mouseMoveEvent(QMouseEvent* e)
+{
+	if (m_mousePressed && (e->buttons() && Qt::LeftButton))
+	{
+		move(e->globalPos() - m_mousePoint);
+		e->accept();
+	}
+
+}
+
+//鼠标按下事件
+void BasicWindow::mousePressEvent(QMouseEvent* e)
+{
+	if (e->button() == Qt::LeftButton)
+	{
+		m_mousePressed = true;
+		m_mousePoint = e->globalPos() - pos();
+		accept();
+	}
+}
 
 
+//鼠标释放事件
+void BasicWindow::mouseReleaseEvent(QMouseEvent*)
+{
+	m_mousePressed = false;
+}
+
+void BasicWindow::onButtonMinClicked()
+{
+	if (Qt::Tool == (windowFlags() & Qt::Tool))
+	{
+		hide();
+	}
+	else
+	{
+		showMinimized();
+	}
+}
+
+void BasicWindow::onButtonRestoreClicked()
+{
+	QPoint windowPos;
+	QSize windowSize;
+	_titleBar->getRestoreInfo(windowPos, windowSize);
+	setGeometry(QRect(windowPos, windowSize));
+
+}
+
+void BasicWindow::onButtonMaxClicked()
+{
+	_titleBar->saveRestoreInfo(pos(), QSize(width(), height()));
+	QRect desktopRect = QApplication::desktop()->availableGeometry();
+	QRect factRect = QRect(desktopRect.x() - 3, desktopRect.y() - 3,
+		desktopRect.width() + 6, desktopRect.height() + 6);
+	setGeometry(factRect);
+}
 
 
-
+void BasicWindow::onButtonCloseClicked()
+{
+	close();
+}
 

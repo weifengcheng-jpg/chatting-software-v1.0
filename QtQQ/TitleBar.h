@@ -21,7 +21,7 @@ public:
 	~TitleBar();
 
 	void setTitleIcon(QString& filePath); //设置标题栏图标
-	void setTitleContent(QString& titleContent); //设置标题栏内容
+	void setTitleContent(const QString& titleContent); //设置标题栏内容
 	void setTitleWidth(int width); //设置标题栏长度
 	void setButtonType(ButtonTypen buttonType); //设置标题栏按钮类型
 

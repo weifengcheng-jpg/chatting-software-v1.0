@@ -84,7 +84,7 @@ void TitleBar::setTitleIcon(QString& filePath)
 }
 
 //设置标题栏内容
-void TitleBar::setTitleContent(QString& titleContent)
+void TitleBar::setTitleContent(const QString& titleContent)
 {
 	m_pTitleContent->setText(titleContent);
 	m_titleContent = titleContent;

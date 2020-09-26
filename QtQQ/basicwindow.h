@@ -23,7 +23,7 @@ private:
 
 protected:
 	void paintEvent(QPaintEvent*); //绘制事件
-	void mousePressEvent(QMoveEvent* event); //鼠标事件
+	void mousePressEvent(QMouseEvent* event); //鼠标事件
 	void mouseMoveEvent(QMouseEvent* event); //鼠标移动事件
 	void mouseReleaseEvent(QMouseEvent*); //鼠标松开事件
 
@@ -45,7 +45,7 @@ public slots:
 	void onButtonCloseClicked();
 
 protected:
-	QPoint mousePoint; //鼠标位置
+	QPoint m_mousePoint; //鼠标位置
 	bool m_mousePressed; //鼠标是否按下
 	QColor m_colorBackGround; //背景色
 	QString m_styleName; //样式文件名称
