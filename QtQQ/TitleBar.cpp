@@ -207,9 +207,53 @@ void TitleBar::mouseMoveEvent(QMouseEvent* event)
 		QPoint movePoint = event->globalPos() - m_startMovePos;
 		QPoint widgetPos = parentWidget()->pos();
 		m_startMovePos = event->globalPos();
-		parentWidget()->move(widgetPos.x() + movePoint.x, widgetPos.y() + movePoint.y());
+		parentWidget()->move(widgetPos.x() + movePoint.x(), widgetPos.y() + movePoint.y());
 	}
 
 	return QWidget::mouseMoveEvent(event);
+}
+
+void TitleBar::mouseReleaseEvent(QMouseEvent* event)
+{
+	m_isPressed = false;
+	return QWidget::mouseReleaseEvent(event);
+}
+
+//加载样式表
+void TitleBar::loadStyleSheet(const QString& sheetName)
+{
+	QFile file(":/Rexxxx/xxx" + sheetName + ".css");
+	file.open(QFile::ReadOnly);
+	if (file.isOpen())
+	{
+		QString styleSheet = this->styleSheet();
+		styleSheet += QLatin1String(file.readAll());
+		setStyleSheet(styleSheet);
+	}
+}
+
+void TitleBar::onButtonMinClicked()
+{
+	emit signalButtonMinClicked();
+}
+
+
+void TitleBar::onButtonRestoreClicked()
+{
+	m_pButtonRestore->setVisible(false);
+	m_pButtonMax->setVisible(true);
+	emit signalButtonRestoreClicked();
+}
+
+void TitleBar::onButtonMaxClicked()
+{
+	m_pButtonMax->setVisible(false);
+	m_pButtonRestore->setVisible(false);
+	emit signalButtonCloseClicked();
+}
+
+void TitleBar::onButtonCloseClicked()
+{
+	emit signalButtonCloseClicked();
 }
 
